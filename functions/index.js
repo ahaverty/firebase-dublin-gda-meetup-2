@@ -11,6 +11,7 @@ var franc = require('franc');
 var swearjar = require('swearjar');
 var _ = require('lodash');
 
+
 exports.messageLanguageTagger = functions.database.ref('/textMessages/{messageId}').onCreate(event => {
 
     const message = event.data.val();
@@ -20,10 +21,9 @@ exports.messageLanguageTagger = functions.database.ref('/textMessages/{messageId
     const cleanMessage = swearjar.censor(message);
 
     const preText = language && language !== 'und' ? language : emoji.get('question');
-    const profanityEmoji = isProfane ? _.sample(["👹", "🙃", "💩", "🤐", "👎", "☹️"]) : _.sample(["😍", "😻", "😘", "🤗", "🙌", "👍"]);
+    const profanityEmoji = isProfane ? _.sample(["👹", "☠️", "💩", "🤐", "👎", "☹️"]) : _.sample(["😍", "😻", "😘", "🤗", "🙌", "👍"]);
 
-    return event.data.ref.parent.parent.child('taggedTextMessages').push(`${profanityEmoji} (${preText}) ${cleanMessage}`);
-
+    return event.data.ref.parent.parent.child('taggedTextMessages').push(`${profanityEmoji} [${preText}] ${cleanMessage}`);
 });
 
 
@@ -44,14 +44,14 @@ exports.messageLanguageTagger = functions.database.ref('/textMessages/{messageId
 /**
  * EXAMPLE 2
  * Texting customers with lovely deeplinks
- * textReferralSender('0876914896', {params: {phoneNumberId: 'testPhone1'}})
+ * textReferralSender('0876914896', {params: {phoneNumber: '0876914896'}})
  */
 
 var twilioClient = require('twilio');
 var cats = require('cat-ascii-faces');
 
-exports.textReferralSender = functions.database.ref('/phoneNumbers/{phoneNumberId}').onCreate(event => {
-    const phoneNumber = event.data.val();
+exports.textReferralSender = functions.database.ref('/phoneNumbers/{phoneNumber}').onCreate(event => {
+    const phoneNumber = event.params.phoneNumber;
 
     console.log(functions.config());
 
@@ -59,11 +59,18 @@ exports.textReferralSender = functions.database.ref('/phoneNumbers/{phoneNumberI
     var authToken = functions.config().twilio.auth_token;
     var fromNumber = functions.config().twilio.from_number;
 
-    console.log(`${accountSid} and ${authToken}`)
+    console.log(`${accountSid} and ${authToken}`);
     var client = new twilioClient(accountSid, authToken);
 
+    const theCatSays = _.sample([
+        "Skip the queue with Bamboo",
+        "Tap to install",
+        "I'll queue for you",
+        "No more queue please",
+    ]);
+
     return client.messages.create({
-            body: `The cat thinks you should download Bamboo https://zj5z2.app.goo.gl/XTMY    ${cats()}`,
+            body: `${cats()} Cat says "${theCatSays}" https://zj5z2.app.goo.gl/XTMY        ( Sample @ https://github.com/ahaverty/firebase-function-sample )`,
             to: phoneNumber,
             from: '+353861802824'
         })

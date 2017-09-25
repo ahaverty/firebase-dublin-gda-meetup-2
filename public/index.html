@@ -14,8 +14,8 @@
   <script defer src="/__/firebase/4.4.0/firebase-storage.js"></script>
   <!-- initialize the SDK after all desired features are loaded -->
   <script defer src="/__/firebase/init.js"></script>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
-    crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" />
 
   <style>
@@ -29,13 +29,14 @@
   </style>
 </head>
 
+<!-- #1 Form for submitting phone number and messages -->
 <body>
   <div class="main">
     <div class="container">
       <div class="row">
         <div class="col-md-6 margin">
           <form id="firebaseForm">
-            <div class="form-group">
+            <div id="phoneNumberDiv" class="form-group">
               <label for="phoneNumber">Phone Number</label>
               <input id="phoneNumber" type="tel" class="form-control" placeholder="0871234567" required>
             </div>
@@ -54,46 +55,50 @@
   </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-
+      // #2 Get sanitised text messages and show in a list
       firebase.database().ref('taggedTextMessages').on('child_added', function (data) {
         var z = document.createElement('div');
         z.classList.add('list-group-item', 'animated', 'fadeInDown');
         z.innerHTML = `${data.val()}`;
         document.getElementById("all-messages").prepend(z);
       });
-
     });
 
     var form = document.querySelector("#firebaseForm");
 
     form.addEventListener("submit", function (event) {
-      event.preventDefault(); //Prevent refreshing page
+      event.preventDefault();
 
-      const phoneNumber = document.getElementById("phoneNumber").value;
-      const message = document.getElementById("textMessage").value;
+      var phoneNumberInput = document.getElementById("phoneNumber")
+      if (phoneNumberInput && phoneNumberInput.value) {
 
-      firebase.database().ref('textMessages').push(message);
-      firebase.database().ref('phoneNumbers').push(phoneNumber);
+        // #3 Send phone number to database!
+        firebase.database().ref('phoneNumbers').child(phoneNumberInput.value).set(firebase.database.ServerValue.TIMESTAMP);
 
-      form.reset(); //reset form input fields
+        var phoneNumberDiv = document.getElementById("phoneNumberDiv");
+        phoneNumberDiv.parentNode.removeChild(phoneNumberDiv);
+      }
 
+      const messageInput = document.getElementById("textMessage");
+      if (messageInput && messageInput.value) {
+        // #4 Send message to database!
+        firebase.database().ref('textMessages').push(messageInput.value);
+      }
+
+      form.reset();
     });
 
     var textMessagePlaceholders = [
-      "I've been accused of vulgarity. I say that's bullshit.",
-      "Under certain circumstances, profanity provides a relief denied even to prayer.",
-      "What kind of fuckery is this?",
+      "I've been accused of vulgarity. I say that's ********.",
+      "What kind of ******* is this?",
       "Never use a big word when a little filthy one will do.",
       "The urge to shout filthy words at the top of his voice was as strong as ever.",
-      "I am definitely not a fucking toaster."
+      "I am definitely not a ******* toaster."
     ];
     document.getElementById("textMessage").placeholder = _.sample(textMessagePlaceholders);
   </script>
-
 </body>
 
 </html>
