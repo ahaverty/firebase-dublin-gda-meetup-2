@@ -2,13 +2,15 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "dependencies": {
+    "cat-ascii-faces": "^2.0.0",
     "country-data": "0.0.31",
     "emoji-flags": "1.2.0",
     "firebase-admin": "5.2.1",
     "firebase-functions": "0.6.2",
     "franc": "3.1.1",
     "node-emoji": "1.8.1",
-    "swearjar": "^0.2.0"
+    "swearjar": "0.2.0",
+    "twilio": "3.6.7"
   },
   "private": true,
   "devDependencies": {
