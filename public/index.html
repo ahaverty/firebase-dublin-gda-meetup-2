@@ -5,7 +5,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dublin Firebase ❤️</title>
-
   <!-- update the version number as needed -->
   <script defer src="/__/firebase/4.4.0/firebase-app.js"></script>
   <!-- include only the Firebase features as you need -->
@@ -15,125 +14,86 @@
   <script defer src="/__/firebase/4.4.0/firebase-storage.js"></script>
   <!-- initialize the SDK after all desired features are loaded -->
   <script defer src="/__/firebase/init.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" />
 
-  <style media="screen">
-    body {
-      background: #ECEFF1;
-      color: rgba(0, 0, 0, 0.87);
-      font-family: Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
+  <style>
+    .margin {
+      margin-top: 5vh;
     }
 
-    #message {
-      background: white;
-      max-width: 360px;
-      margin: 100px auto 16px;
-      padding: 32px 24px;
-      border-radius: 3px;
-    }
-
-    #message h2 {
-      color: #ffa100;
-      font-weight: bold;
-      font-size: 16px;
-      margin: 0 0 8px;
-    }
-
-    #message h1 {
-      font-size: 22px;
-      font-weight: 300;
-      color: rgba(0, 0, 0, 0.6);
-      margin: 0 0 16px;
-    }
-
-    #message p {
-      line-height: 140%;
-      margin: 16px 0 24px;
-      font-size: 14px;
-    }
-
-    #message a {
-      display: block;
-      text-align: center;
-      background: #039be5;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: white;
-      padding: 16px;
-      border-radius: 4px;
-    }
-
-    #message,
-    #message a {
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    }
-
-    #load {
-      color: rgba(0, 0, 0, 0.4);
-      text-align: center;
-      font-size: 13px;
-    }
-
-    @media (max-width: 600px) {
-      body,
-      #message {
-        margin-top: 0;
-        background: white;
-        box-shadow: none;
-      }
-      body {
-        border-top: 16px solid #ffa100;
-      }
+    .main {
+      margin-bottom: 5vh;
     }
   </style>
 </head>
 
 <body>
-  <div id="message">
-    <form onsubmit="formSubmit(); return false;">
-      Phone Number: <input type="tel" id="phoneNumber" name="usrtel">
-      <br/> Message: <input type="text" id="textMessage" name="textMessage">
-      <br/>
-      <input type="submit">
-    </form>
-    <div id="all-messages"></div>
+  <div class="main">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 margin">
+          <form id="firebaseForm">
+            <div class="form-group">
+              <label for="phoneNumber">Phone Number</label>
+              <input id="phoneNumber" type="tel" class="form-control" placeholder="0871234567" required>
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="textMessage" class="form-control" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+        <div class="col-md-6 margin">
+          <div id="all-messages" class="list-group"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   </div>
 
-  <p id="load">Firebase SDK Loading&hellip;</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-      try {
-        let app = firebase.app();
-        let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] ===
-          'function');
-        document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
+      firebase.database().ref('taggedTextMessages').on('child_added', function (data) {
+        var z = document.createElement('div');
+        z.classList.add('list-group-item', 'animated', 'fadeInDown');
+        z.innerHTML = `${data.val()}`;
+        document.getElementById("all-messages").prepend(z);
+      });
 
-        firebase.database().ref('taggedTextMessages').on('child_added', function (data) {
-          var z = document.createElement('div');
-          z.innerHTML = `${data.val()}`;
-          document.getElementById("all-messages").appendChild(z);
-        });
-
-      } catch (e) {
-        console.error(e);
-        document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
-      }
     });
 
-    function formSubmit() {
-      const phoneNumber = document.getElementById("phoneNumber").value
-      const message = document.getElementById("textMessage").value
+    var form = document.querySelector("#firebaseForm");
 
-      document.getElementById("phoneNumber").innerText = "";
-      document.getElementById("textMessage").innerText = "";
+    form.addEventListener("submit", function (event) {
+      event.preventDefault(); //Prevent refreshing page
+
+      const phoneNumber = document.getElementById("phoneNumber").value;
+      const message = document.getElementById("textMessage").value;
 
       firebase.database().ref('textMessages').push(message);
       firebase.database().ref('phoneNumbers').push(phoneNumber);
-    }
+
+      form.reset(); //reset form input fields
+
+    });
+
+    var textMessagePlaceholders = [
+      "I've been accused of vulgarity. I say that's bullshit.",
+      "Under certain circumstances, profanity provides a relief denied even to prayer.",
+      "What kind of fuckery is this?",
+      "Never use a big word when a little filthy one will do.",
+      "The urge to shout filthy words at the top of his voice was as strong as ever.",
+      "I am definitely not a fucking toaster."
+    ];
+    document.getElementById("textMessage").placeholder = _.sample(textMessagePlaceholders);
   </script>
+
 </body>
 
 </html>

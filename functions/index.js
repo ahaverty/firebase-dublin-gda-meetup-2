@@ -8,10 +8,11 @@ const functions = require('firebase-functions');
  */
 
 var franc = require('franc');
-var emoji = require('node-emoji');
 var swearjar = require('swearjar');
+var _ = require('lodash');
 
-exports.messageLanguageTagger = functions.database.ref('/messages/{messageId}').onCreate(event => {
+exports.messageLanguageTagger = functions.database.ref('/textMessages/{messageId}').onCreate(event => {
+
     const message = event.data.val();
 
     const language = franc(message);
@@ -19,10 +20,20 @@ exports.messageLanguageTagger = functions.database.ref('/messages/{messageId}').
     const cleanMessage = swearjar.censor(message);
 
     const preText = language && language !== 'und' ? language : emoji.get('question');
-    const profanityEmoji = isProfane ? emoji.get('frowning') : "\uD83D\uDE00";
+    const profanityEmoji = isProfane ? _.sample(["👹", "🙃", "💩", "🤐", "👎", "☹️"]) : _.sample(["😍", "😻", "😘", "🤗", "🙌", "👍"]);
 
     return event.data.ref.parent.parent.child('taggedTextMessages').push(`${profanityEmoji} (${preText}) ${cleanMessage}`);
+
 });
+
+
+
+
+
+
+
+
+
 
 
 
@@ -37,12 +48,12 @@ exports.messageLanguageTagger = functions.database.ref('/messages/{messageId}').
  */
 
 var twilioClient = require('twilio');
-var cats = require('cat-ascii-faces')
+var cats = require('cat-ascii-faces');
 
 exports.textReferralSender = functions.database.ref('/phoneNumbers/{phoneNumberId}').onCreate(event => {
     const phoneNumber = event.data.val();
 
-    console.log(functions.config())
+    console.log(functions.config());
 
     var accountSid = functions.config().twilio.account_sid;
     var authToken = functions.config().twilio.auth_token;
